@@ -12,15 +12,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data['user_id']) || !isset($data['new_password'])) {
+if (!isset($data['new_password']) || (!isset($data['user_id']) && !isset($data['email']))) {
     echo json_encode(["status" => "error", "message" => "Missing required fields"]);
     exit;
 }
 
-$user_id = $conn->real_escape_string($data['user_id']);
 $new_password = password_hash($data['new_password'], PASSWORD_DEFAULT);
 
-$sql = "UPDATE users SET password='$new_password' WHERE id='$user_id'";
+if (isset($data['user_id'])) {
+    $user_id = $conn->real_escape_string($data['user_id']);
+    $sql = "UPDATE users SET password='$new_password' WHERE id='$user_id'";
+} else {
+    $email = $conn->real_escape_string($data['email']);
+    $sql = "UPDATE users SET password='$new_password' WHERE email='$email'";
+}
 
 if ($conn->query($sql) === TRUE) {
     if ($conn->affected_rows > 0) {
