@@ -56,19 +56,38 @@
     <script>
         function handleFileSelect(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const dataUrl = e.target.result;
-                    // Save the image data locally so the next page can display it
-                    localStorage.setItem('capturedPhoto', dataUrl);
+            if (!file) return;
+
+            // Show loading state
+            document.querySelector('.upload-dashed-area h3').innerHTML = '<span class="highlight">Uploading...</span> please wait';
+
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            fetch('http://localhost/civic_backend/upload_image.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Store the server URL (not base64) so admin page can display it
+                    localStorage.setItem('capturedPhoto', data.photo_url);
                     window.location.href = 'report_photo.html';
-                };
-                reader.readAsDataURL(file);
-            }
+                } else {
+                    alert('Image upload failed: ' + data.message);
+                    document.querySelector('.upload-dashed-area h3').innerHTML = '<span class="highlight">Click to upload</span> or drag and drop';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Network error uploading image. Ensure XAMPP is running.');
+                document.querySelector('.upload-dashed-area h3').innerHTML = '<span class="highlight">Click to upload</span> or drag and drop';
+            });
         }
     </script>
 </body>
 </html>
+
 
 
