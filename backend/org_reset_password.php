@@ -1,15 +1,5 @@
 <?php
-// CORS headers FIRST — before any output
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
-
-// Handle OPTIONS preflight request (sent by browsers and Android before POST)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit(0);
-}
+require_once 'db.php';
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -17,7 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once 'db.php';
 
 // Read raw JSON body
 $rawInput = file_get_contents("php://input");
